@@ -51,7 +51,7 @@ mod tests {
 		assert_eq!(balances.balance(&"bob".to_string()), 0);
 	}
 	#[test]
-	fn transfer_balance() {
+	fn transfer_balance_ok() {
 		let alice = "alice".to_string();
 		let bob = "bob".to_string();
 
@@ -62,5 +62,19 @@ mod tests {
 
 		assert_eq!(balances.balance(&alice), 10);
 		assert_eq!(balances.balance(&bob), 90);
+	}
+	#[test]
+	fn transfer_balance_insufficient() {
+		let alice = "alice".to_string();
+		let bob = "bob".to_string();
+
+		let mut balances = super::Pallet::new();
+
+		balances.set_balance(&alice, 100);
+		let result = balances.transfer(alice.clone(), bob.clone(), 110);
+
+		assert_eq!(result, Err("Insufficient balance"));
+		assert_eq!(balances.balance(&alice), 100);
+		assert_eq!(balances.balance(&bob), 0);
 	}
 }
