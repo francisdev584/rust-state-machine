@@ -17,15 +17,33 @@ impl Pallet {
 		*self.balances.get(who).unwrap_or(&0)
 	}
 
+	pub fn transfer(
+		&mut self,
+		caller: String,
+		to: String,
+		amount: u128,
+	) -> Result<(), &'static str> {
+		let caller_balance = self.balance(&caller);
+		let to_balance = self.balance(&to);
+
+		let new_caller_balance =
+			caller_balance.checked_sub(amount).ok_or("Insufficient balance")?;
+
+		let new_to_balance =
+			to_balance.checked_add(amount).ok_or("Overflow when adding to balance")?;
+
+		self.set_balance(&caller, new_caller_balance);
+		self.set_balance(&to, new_to_balance);
+
+		Ok(())
+	}
 }
 
 #[cfg(test)]
 mod tests {
-	use crate::balances;
-
 	#[test]
 	fn init_balances() {
-		let mut balances = balances::Pallet::new();
+		let mut balances = super::Pallet::new();
 
 		assert_eq!(balances.balance(&"alice".to_string()), 0);
 		balances.set_balance(&"alice".to_string(), 100);
