@@ -36,12 +36,12 @@ fn main() {
 		.transfer(alice.clone(), bob.clone(), 30)
 		.map_err(|e| println!("Error:{:?}", e));
 
-		runtime.system.inc_nonce(&alice);
+	runtime.system.inc_nonce(&alice);
 
-		let _ = runtime
-			.balances
-			.transfer(alice.clone(), charlie.clone(), 20)
-			.map_err(|e| println!("Error:{:?}", e));
+	let _ = runtime
+		.balances
+		.transfer(alice.clone(), charlie.clone(), 20)
+		.map_err(|e| println!("Error:{:?}", e));
 
-		println!("{:#?}",runtime);
+	println!("{:#?}", runtime);
 }
