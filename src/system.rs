@@ -11,19 +11,22 @@ impl Pallet {
 	}
 
 	pub fn block_number(self) -> u32 {
-        unimplemented!();
+		self.block_number
 	}
 
 	pub fn inc_block_number(&mut self) {
-        unimplemented!();
+		// crashes if overflow for purpose
+		self.block_number = self.block_number.checked_add(1).unwrap();
 	}
 
 	pub fn inc_nonce(&mut self, who: &String) {
-        unimplemented!();
+		let nonce = self.nonce.get(who).unwrap_or(&0);
+		let new_nonce = nonce.checked_add(1).unwrap();
+		self.nonce.insert(who.clone(), new_nonce);
 	}
 
 	pub fn get_nonce(&self, who: &String) -> u32 {
-        unimplemented!();
+		*self.nonce.get(who).unwrap_or(&0)
 	}
 }
 
