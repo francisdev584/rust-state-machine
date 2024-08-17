@@ -41,6 +41,8 @@ impl Pallet {
 
 #[cfg(test)]
 mod tests {
+	use std::u128;
+
 	#[test]
 	fn init_balances() {
 		let mut balances = super::Pallet::new();
@@ -76,5 +78,21 @@ mod tests {
 		assert_eq!(result, Err("Insufficient balance"));
 		assert_eq!(balances.balance(&alice), 100);
 		assert_eq!(balances.balance(&bob), 0);
+	}
+	#[test]
+	fn transfer_balance_overflow() {
+		let alice = "alice".to_string();
+		let bob = "bob".to_string();
+
+		let mut balances = super::Pallet::new();
+
+		balances.set_balance(&alice, 100);
+		balances.set_balance(&bob, u128::MAX);
+
+		let result = balances.transfer(alice.clone(), bob.clone(), 10);
+
+		assert_eq!(result, Err("Overflow when adding to balance"));
+		assert_eq!(balances.balance(&alice), 100);
+		assert_eq!(balances.balance(&bob), u128::MAX);
 	}
 }
