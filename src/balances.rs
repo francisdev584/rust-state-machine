@@ -50,4 +50,17 @@ mod tests {
 		assert_eq!(balances.balance(&"alice".to_string()), 100);
 		assert_eq!(balances.balance(&"bob".to_string()), 0);
 	}
+	#[test]
+	fn transfer_balance() {
+		let alice = "alice".to_string();
+		let bob = "bob".to_string();
+
+		let mut balances = super::Pallet::new();
+
+		balances.set_balance(&alice, 100);
+		let _ = balances.transfer(alice.clone(), bob.clone(), 90);
+
+		assert_eq!(balances.balance(&alice), 10);
+		assert_eq!(balances.balance(&bob), 90);
+	}
 }
