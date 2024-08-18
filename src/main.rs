@@ -94,26 +94,38 @@ fn main() {
 	let bob = "bob".to_string();
 	let charlie = "charlie".to_string();
 
-	runtime.balances.set_balance(&alice.clone(), 100);
+	runtime.balances.set_balance(&alice, 100);
 
-	runtime.system.inc_block_number();
+	let block_1 = types::Block {
+		header: support::Header { block_number: 1 },
+		extrinsics: vec![
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::BalancesTransfer { to: bob.clone(), amount: 30 },
+			},
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::BalancesTransfer { to: charlie.clone(), amount: 20 },
+			},
+		],
+	};
 
-	// assert_eq!(runtime.system.block_number(), 1);
+	let block_2 = types::Block {
+		header: support::Header { block_number: 2 },
+		extrinsics: vec![
+			support::Extrinsic {
+				caller: bob.clone(),
+				call: RuntimeCall::BalancesTransfer { to: alice.clone(), amount: 30 },
+			},
+			support::Extrinsic {
+				caller: charlie.clone(),
+				call: RuntimeCall::BalancesTransfer { to: alice.clone(), amount: 20 },
+			},
+		],
+	};
 
-	// first transaction
-	runtime.system.inc_nonce(&alice);
-
-	let _ = runtime
-		.balances
-		.transfer(alice.clone(), bob.clone(), 30)
-		.map_err(|e| println!("Error:{:?}", e));
-
-	runtime.system.inc_nonce(&alice);
-
-	let _ = runtime
-		.balances
-		.transfer(alice.clone(), charlie.clone(), 20)
-		.map_err(|e| println!("Error:{:?}", e));
+	runtime.execute_block(block_1).expect("wrong block execution");
+	runtime.execute_block(block_2).expect("wrong block execution");
 
 	println!("{:#?}", runtime);
 }
