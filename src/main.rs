@@ -17,7 +17,7 @@ mod types {
 }
 
 pub enum RuntimeCall {
-	BalancesTransfer { to: types::AccountId, amount: types::Balance },
+	Balances(balances::Call<Runtime>),
 }
 
 impl system::Config for Runtime {
@@ -80,8 +80,8 @@ impl crate::support::Dispatch for Runtime {
 		runtime_call: Self::Call,
 	) -> support::DispatchResult {
 		match runtime_call {
-			RuntimeCall::BalancesTransfer { to, amount } => {
-				self.balances.transfer(caller, to, amount)?;
+			RuntimeCall::Balances(call) => {
+				self.balances.dispatch(caller, call)?;
 			},
 		}
 		Ok(())
@@ -101,31 +101,22 @@ fn main() {
 		extrinsics: vec![
 			support::Extrinsic {
 				caller: alice.clone(),
-				call: RuntimeCall::BalancesTransfer { to: bob.clone(), amount: 30 },
+				call: RuntimeCall::Balances(balances::Call::Transfer {
+					to: bob.clone(),
+					amount: 30,
+				}),
 			},
 			support::Extrinsic {
 				caller: alice.clone(),
-				call: RuntimeCall::BalancesTransfer { to: charlie.clone(), amount: 20 },
-			},
-		],
-	};
-
-	let block_2 = types::Block {
-		header: support::Header { block_number: 2 },
-		extrinsics: vec![
-			support::Extrinsic {
-				caller: bob.clone(),
-				call: RuntimeCall::BalancesTransfer { to: alice.clone(), amount: 30 },
-			},
-			support::Extrinsic {
-				caller: charlie.clone(),
-				call: RuntimeCall::BalancesTransfer { to: alice.clone(), amount: 20 },
+				call: RuntimeCall::Balances(balances::Call::Transfer {
+					to: charlie.clone(),
+					amount: 20,
+				}),
 			},
 		],
 	};
 
 	runtime.execute_block(block_1).expect("wrong block execution");
-	runtime.execute_block(block_2).expect("wrong block execution");
 
 	println!("{:#?}", runtime);
 }
