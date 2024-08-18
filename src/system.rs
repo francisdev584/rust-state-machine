@@ -4,7 +4,7 @@ use num::traits::{CheckedAdd, One, Zero};
 
 pub trait Config {
 	type AccountId: Ord + Clone;
-	type BlockNumber: Zero + One + CheckedAdd;
+	type BlockNumber: Zero + One + CheckedAdd + Copy;
 	type Nonce: Zero + One + Copy + CheckedAdd;
 }
 
@@ -19,7 +19,7 @@ impl<T: Config> Pallet<T> {
 		Self { block_number: T::BlockNumber::zero(), nonce: BTreeMap::new() }
 	}
 
-	pub fn block_number(self) -> T::BlockNumber {
+	pub fn block_number(&self) -> T::BlockNumber {
 		self.block_number
 	}
 
@@ -47,7 +47,6 @@ mod test {
 		type AccountId = String;
 		type BlockNumber = u32;
 		type Nonce = u32;
-		
 	}
 
 	#[test]

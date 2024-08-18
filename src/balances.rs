@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use num::traits::{CheckedAdd, CheckedSub, Zero};
 
-pub trait Config : crate::system::Config{
+pub trait Config: crate::system::Config {
 	type Balance: Zero + CheckedSub + CheckedAdd + Copy;
 }
 #[derive(Debug)]
@@ -10,8 +10,7 @@ pub struct Pallet<T: Config> {
 	balances: BTreeMap<T::AccountId, T::Balance>,
 }
 
-impl<T: Config> Pallet<T>
-{
+impl<T: Config> Pallet<T> {
 	pub fn new() -> Self {
 		Self { balances: BTreeMap::new() }
 	}
@@ -48,24 +47,22 @@ impl<T: Config> Pallet<T>
 
 #[cfg(test)]
 mod tests {
-    use crate::system;
+	use crate::system;
 
 	struct TestConfig;
-	impl system::Config for TestConfig{
+	impl system::Config for TestConfig {
 		type AccountId = String;
 		type BlockNumber = u32;
 		type Nonce = u32;
-		
 	}
 
 	impl super::Config for TestConfig {
-		type Balance =  u128;
+		type Balance = u128;
 	}
 
 	#[test]
 	fn init_balances() {
 		let mut balances: super::Pallet<TestConfig> = super::Pallet::new();
-
 
 		assert_eq!(balances.balance(&"alice".to_string()), 0);
 		balances.set_balance(&"alice".to_string(), 100);
@@ -77,7 +74,7 @@ mod tests {
 		let alice = "alice".to_string();
 		let bob = "bob".to_string();
 
-		let mut balances:  super::Pallet<TestConfig> = super::Pallet::new();
+		let mut balances: super::Pallet<TestConfig> = super::Pallet::new();
 
 		balances.set_balance(&alice, 100);
 		let _ = balances.transfer(alice.clone(), bob.clone(), 90);
@@ -90,7 +87,7 @@ mod tests {
 		let alice = "alice".to_string();
 		let bob = "bob".to_string();
 
-		let mut balances:  super::Pallet<TestConfig> = super::Pallet::new();
+		let mut balances: super::Pallet<TestConfig> = super::Pallet::new();
 
 		balances.set_balance(&alice, 100);
 		balances.set_balance(&bob, 0);
@@ -105,7 +102,7 @@ mod tests {
 		let alice = "alice".to_string();
 		let bob = "bob".to_string();
 
-		let mut balances:  super::Pallet<TestConfig> = super::Pallet::new();
+		let mut balances: super::Pallet<TestConfig> = super::Pallet::new();
 
 		balances.set_balance(&alice, 100);
 		balances.set_balance(&bob, u128::MAX);
