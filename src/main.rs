@@ -1,3 +1,4 @@
+use balances::Call;
 use support::Dispatch;
 
 mod balances;
@@ -15,10 +16,12 @@ mod types {
 	pub type Extrinsic = support::Extrinsic<AccountId, crate::RuntimeCall>;
 	pub type Header = support::Header<BlockNumber>;
 	pub type Block = support::Block<Header, Extrinsic>;
+	pub type Content = &'static str;
 }
 
 pub enum RuntimeCall {
 	Balances(balances::Call<Runtime>),
+	ProofOfExistence(proof_of_existence::Call<Runtime>)
 }
 
 impl system::Config for Runtime {
@@ -30,18 +33,27 @@ impl system::Config for Runtime {
 impl balances::Config for Runtime {
 	type Balance = types::Balance;
 }
+
+impl proof_of_existence::Config for Runtime {
+	type Content = types::Content;
+}
 // This is our main Runtime.
 // It accumulates all of the different pallets we want to use.
 #[derive(Debug)]
 pub struct Runtime {
 	system: system::Pallet<Runtime>,
 	balances: balances::Pallet<Runtime>,
+	proof_of_existence: proof_of_existence::Pallet<Runtime>
 }
 
 impl Runtime {
 	// Create a new instance of the main Runtime, by creating a new instance of each pallet.
 	fn new() -> Self {
-		Self { system: system::Pallet::new(), balances: balances::Pallet::new() }
+		Self { 
+			system: system::Pallet::new(), 
+			balances: balances::Pallet::new(),
+			proof_of_existence: proof_of_existence::Pallet::new()
+		}
 	}
 
 	fn execute_block(&mut self, block: types::Block) -> support::DispatchResult {
@@ -84,6 +96,9 @@ impl crate::support::Dispatch for Runtime {
 			RuntimeCall::Balances(call) => {
 				self.balances.dispatch(caller, call)?;
 			},
+			RuntimeCall::ProofOfExistence(call) => {
+				self.proof_of_existence.dispatch(caller, call)?;
+			}
 		}
 		Ok(())
 	}
