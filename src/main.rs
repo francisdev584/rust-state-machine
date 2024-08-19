@@ -21,7 +21,7 @@ mod types {
 
 pub enum RuntimeCall {
 	Balances(balances::Call<Runtime>),
-	ProofOfExistence(proof_of_existence::Call<Runtime>)
+	ProofOfExistence(proof_of_existence::Call<Runtime>),
 }
 
 impl system::Config for Runtime {
@@ -43,16 +43,16 @@ impl proof_of_existence::Config for Runtime {
 pub struct Runtime {
 	system: system::Pallet<Runtime>,
 	balances: balances::Pallet<Runtime>,
-	proof_of_existence: proof_of_existence::Pallet<Runtime>
+	proof_of_existence: proof_of_existence::Pallet<Runtime>,
 }
 
 impl Runtime {
 	// Create a new instance of the main Runtime, by creating a new instance of each pallet.
 	fn new() -> Self {
-		Self { 
-			system: system::Pallet::new(), 
+		Self {
+			system: system::Pallet::new(),
 			balances: balances::Pallet::new(),
-			proof_of_existence: proof_of_existence::Pallet::new()
+			proof_of_existence: proof_of_existence::Pallet::new(),
 		}
 	}
 
@@ -98,7 +98,7 @@ impl crate::support::Dispatch for Runtime {
 			},
 			RuntimeCall::ProofOfExistence(call) => {
 				self.proof_of_existence.dispatch(caller, call)?;
-			}
+			},
 		}
 		Ok(())
 	}
@@ -133,6 +133,26 @@ fn main() {
 	};
 
 	runtime.execute_block(block_1).expect("wrong block execution");
+
+	let block_2 = types::Block {
+		header: support::Header { block_number: 2 },
+		extrinsics: vec![
+			support::Extrinsic {
+				caller: alice.clone(),
+				call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim {
+					claim: "my_document",
+				}),
+			},
+			support::Extrinsic {
+				caller: bob.clone(),
+				call: RuntimeCall::ProofOfExistence(proof_of_existence::Call::CreateClaim {
+					claim: "bobs document",
+				}),
+			},
+		],
+	};
+
+	runtime.execute_block(block_2).expect("wrong block execution");
 
 	println!("{:#?}", runtime);
 }

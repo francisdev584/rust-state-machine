@@ -25,7 +25,7 @@ impl<T: Config> Pallet<T> {
 		Self { claims: BTreeMap::new() }
 	}
 
-    /// Get the owner (if any) of a claim.
+	/// Get the owner (if any) of a claim.
 	pub fn get_claim(&self, claim: &T::Content) -> Option<&T::AccountId> {
 		self.claims.get(claim)
 	}
@@ -34,12 +34,12 @@ impl<T: Config> Pallet<T> {
 	/// This function will return an error if someone already has claimed that content.
 	pub fn create_claim(&mut self, caller: T::AccountId, claim: T::Content) -> DispatchResult {
 		match self.get_claim(&claim) {
-            Some(_) => Err("Claim already exists"),
-            None => {
-                self.claims.insert(claim, caller);
-                Ok(())
-            }
-        }
+			Some(_) => Err("Claim already exists"),
+			None => {
+				self.claims.insert(claim, caller);
+				Ok(())
+			},
+		}
 	}
 
 	/// Revoke an existing claim on some content.
@@ -47,19 +47,19 @@ impl<T: Config> Pallet<T> {
 	/// It will return an error if the claim does not exist, or if the caller is not the owner.
 	pub fn revoke_claim(&mut self, caller: T::AccountId, claim: T::Content) -> DispatchResult {
 		let claim_owner = self.get_claim(&claim).ok_or("Claim does not exist")?;
-		
-        if claim_owner != &caller {
-            return Err("Caller is not the owner of the claim");
-        }
 
-        self.claims.remove(&claim);
-        Ok(())
+		if claim_owner != &caller {
+			return Err("Caller is not the owner of the claim");
+		}
+
+		self.claims.remove(&claim);
+		Ok(())
 	}
 }
 
 pub enum Call<T: Config> {
-	CreateClaim { claim: T::Content},
-	RevokeClaim { claim: T::Content}
+	CreateClaim { claim: T::Content },
+	RevokeClaim { claim: T::Content },
 }
 
 impl<T: Config> crate::support::Dispatch for Pallet<T> {
@@ -68,8 +68,8 @@ impl<T: Config> crate::support::Dispatch for Pallet<T> {
 
 	fn dispatch(&mut self, caller: Self::Caller, call: Self::Call) -> DispatchResult {
 		match call {
-			Call::CreateClaim {claim } => self.create_claim(caller, claim),
-			Call::RevokeClaim { claim } => self.revoke_claim(caller, claim)
+			Call::CreateClaim { claim } => self.create_claim(caller, claim),
+			Call::RevokeClaim { claim } => self.revoke_claim(caller, claim),
 		}
 	}
 }
@@ -90,22 +90,21 @@ mod test {
 
 	#[test]
 	fn basic_proof_of_existence() {
-        let mut poe = super::Pallet::<TestConfig>::new();
+		let mut poe = super::Pallet::<TestConfig>::new();
 
-        let _ = poe.create_claim("alice", "my_document");
-        assert_eq!(poe.get_claim(&"my_document"), Some(&"alice"));
+		let _ = poe.create_claim("alice", "my_document");
+		assert_eq!(poe.get_claim(&"my_document"), Some(&"alice"));
 
-        let res = poe.revoke_claim("bob", "my_document");
-        assert_eq!(res, Err("Caller is not the owner of the claim"));
+		let res = poe.revoke_claim("bob", "my_document");
+		assert_eq!(res, Err("Caller is not the owner of the claim"));
 
-        let res = poe.create_claim("bob", "my_document");
-        assert_eq!(res,Err("Claim already exists"));
-		
-        let res = poe.revoke_claim("alice", "non existant");
-        assert_eq!(res, Err("Claim does not exist"));
+		let res = poe.create_claim("bob", "my_document");
+		assert_eq!(res, Err("Claim already exists"));
 
-        let res = poe.revoke_claim("alice", "my_document");
-        assert_eq!(res, Ok(()));
+		let res = poe.revoke_claim("alice", "non existant");
+		assert_eq!(res, Err("Claim does not exist"));
 
+		let res = poe.revoke_claim("alice", "my_document");
+		assert_eq!(res, Ok(()));
 	}
 }
